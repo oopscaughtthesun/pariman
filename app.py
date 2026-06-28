@@ -1,35 +1,39 @@
+import base64
 import json
 import os
 import psycopg2
-import psycopg2.extras
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, Response
 
 app = Flask(__name__)
 
 DATABASE_URL = os.environ.get("DATABASE_URL", "")
-# Render's Postgres URLs sometimes start with postgres:// — psycopg2 needs postgresql://
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
 
 def get_conn():
-    conn = psycopg2.connect(DATABASE_URL)
-    return conn
+    return psycopg2.connect(DATABASE_URL)
 
 
 def init_db():
     conn = get_conn()
     cur = conn.cursor()
     cur.execute(
-        """CREATE TABLE IF NOT EXISTS masters (
-            uid INTEGER PRIMARY KEY,
-            persons JSONB NOT NULL
+        """CREATE TABLE IF NOT EXISTS kv_store (
+            key TEXT PRIMARY KEY,
+            value JSONB
         )"""
     )
     cur.execute(
-        """CREATE TABLE IF NOT EXISTS meta (
+        """CREATE TABLE IF NOT EXISTS files (
             key TEXT PRIMARY KEY,
-            value INTEGER
+            blob BYTEA NOT NULL,
+            filename TEXT,
+            type TEXT,
+            client_id TEXT,
+            fy TEXT,
+            size INTEGER,
+            uploaded TIMESTAMP DEFAULT now()
         )"""
     )
     conn.commit()
@@ -42,90 +46,162 @@ init_db()
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return render_template("itr.html")
 
 
-# ---------- Masters CRUD ----------
+# ---------- KV store (clients, users, allocations, inward, itrStatus, seq) ----------
 
-@app.route("/api/masters", methods=["GET"])
-def get_all_masters():
+@app.route("/api/kv", methods=["GET"])
+def kv_get_all():
     conn = get_conn()
     cur = conn.cursor()
-    cur.execute("SELECT uid, persons FROM masters")
+    cur.execute("SELECT key, value FROM kv_store")
     rows = cur.fetchall()
     cur.close()
     conn.close()
-    result = [{"uid": r[0], "persons": r[1]} for r in rows]
-    return jsonify(result)
+    return jsonify({k: v for k, v in rows})
 
 
-@app.route("/api/masters/<int:uid>", methods=["GET"])
-def get_one_master(uid):
+@app.route("/api/kv/<key>", methods=["POST"])
+def kv_set(key):
+    body = request.get_json(force=True)
+    value = body.get("value")
     conn = get_conn()
     cur = conn.cursor()
-    cur.execute("SELECT uid, persons FROM masters WHERE uid=%s", (uid,))
+    cur.execute(
+        """INSERT INTO kv_store (key, value) VALUES (%s, %s)
+           ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value""",
+        (key, json.dumps(value)),
+    )
+    conn.commit()
+    cur.close()
+    conn.close()
+    return jsonify({"ok": True})
+
+
+@app.route("/api/kv/<key>", methods=["DELETE"])
+def kv_del(key):
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute("DELETE FROM kv_store WHERE key=%s", (key,))
+    conn.commit()
+    cur.close()
+    conn.close()
+    return jsonify({"ok": True})
+
+
+# ---------- File storage (ITR documents) ----------
+
+MAX_FILE = 5 * 1024 * 1024  # 5 MB
+
+
+@app.route("/api/files/<path:key>", methods=["POST"])
+def file_save(key):
+    body = request.get_json(force=True)
+    b64 = body["data"]  # base64-encoded file content
+    meta = body.get("meta", {})
+    raw = base64.b64decode(b64)
+    if len(raw) > MAX_FILE:
+        return jsonify({"error": "File exceeds 5 MB limit"}), 400
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute(
+        """INSERT INTO files (key, blob, filename, type, client_id, fy, size)
+           VALUES (%s, %s, %s, %s, %s, %s, %s)
+           ON CONFLICT (key) DO UPDATE SET
+             blob=EXCLUDED.blob, filename=EXCLUDED.filename, type=EXCLUDED.type,
+             client_id=EXCLUDED.client_id, fy=EXCLUDED.fy, size=EXCLUDED.size,
+             uploaded=now()""",
+        (
+            key,
+            psycopg2.Binary(raw),
+            meta.get("filename"),
+            meta.get("type"),
+            meta.get("clientId"),
+            meta.get("fy"),
+            len(raw),
+        ),
+    )
+    conn.commit()
+    cur.close()
+    conn.close()
+    return jsonify({"ok": True})
+
+
+@app.route("/api/files/<path:key>", methods=["GET"])
+def file_get(key):
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute("SELECT blob, type, filename FROM files WHERE key=%s", (key,))
+    row = cur.fetchone()
+    cur.close()
+    conn.close()
+    if not row:
+        return jsonify(None), 404
+    blob, ftype, filename = row
+    return Response(
+        bytes(blob),
+        mimetype=ftype or "application/octet-stream",
+        headers={"Content-Disposition": f'inline; filename="{filename or key}"'},
+    )
+
+
+@app.route("/api/files/<path:key>/meta", methods=["GET"])
+def file_meta(key):
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT filename, type, client_id, fy, size, uploaded FROM files WHERE key=%s",
+        (key,),
+    )
     row = cur.fetchone()
     cur.close()
     conn.close()
     if not row:
         return jsonify(None)
-    return jsonify({"uid": row[0], "persons": row[1]})
+    return jsonify(
+        {
+            "filename": row[0],
+            "type": row[1],
+            "clientId": row[2],
+            "fy": row[3],
+            "size": row[4],
+            "uploaded": row[5].isoformat() if row[5] else None,
+        }
+    )
 
 
-@app.route("/api/masters", methods=["POST"])
-def put_master():
-    rec = request.get_json(force=True)
-    uid = rec["uid"]
-    persons = rec.get("persons", [])
+@app.route("/api/files/<path:key>", methods=["DELETE"])
+def file_del(key):
     conn = get_conn()
     cur = conn.cursor()
-    cur.execute(
-        """INSERT INTO masters (uid, persons) VALUES (%s, %s)
-           ON CONFLICT (uid) DO UPDATE SET persons = EXCLUDED.persons""",
-        (uid, json.dumps(persons)),
-    )
+    cur.execute("DELETE FROM files WHERE key=%s", (key,))
     conn.commit()
     cur.close()
     conn.close()
     return jsonify({"ok": True})
 
 
-@app.route("/api/masters/<int:uid>", methods=["DELETE"])
-def delete_master(uid):
+@app.route("/api/files-all", methods=["DELETE"])
+def files_delete_all():
     conn = get_conn()
     cur = conn.cursor()
-    cur.execute("DELETE FROM masters WHERE uid=%s", (uid,))
+    cur.execute("DELETE FROM files")
     conn.commit()
     cur.close()
     conn.close()
     return jsonify({"ok": True})
 
 
-# ---------- UID counter (meta) ----------
-
-@app.route("/api/next-uid", methods=["POST"])
-def next_uid():
+@app.route("/api/files-usage", methods=["GET"])
+def files_usage():
     conn = get_conn()
     cur = conn.cursor()
-    cur.execute("SELECT value FROM meta WHERE key='lastUID'")
-    row = cur.fetchone()
-    cur_val = row[0] if row else 999
-    if not cur_val or cur_val < 1000:
-        cur_val = 999
-    cur_val += 1
-    if cur_val > 10000:
-        cur.close()
-        conn.close()
-        return jsonify({"error": "UID limit reached"}), 400
-    cur.execute(
-        """INSERT INTO meta (key, value) VALUES ('lastUID', %s)
-           ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value""",
-        (cur_val,),
-    )
-    conn.commit()
+    cur.execute("SELECT COALESCE(SUM(size),0) FROM files")
+    total = cur.fetchone()[0]
     cur.close()
     conn.close()
-    return jsonify({"uid": cur_val})
+    return jsonify({"usedBytes": int(total)})
 
 
 if __name__ == "__main__":
