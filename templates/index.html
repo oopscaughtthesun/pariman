@@ -1,0 +1,1386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pariman Advisors | Document Automation</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+:root{
+  --bg:#0f172a;
+  --bg-2:#1e293b;
+  --panel:#ffffff;
+  --ink:#0f172a;
+  --muted:#64748b;
+  --line:#e2e8f0;
+  --accent:#1e40af;
+  --accent-2:#2563eb;
+  --accent-soft:#eff6ff;
+  --success:#059669;
+  --danger:#dc2626;
+  --warning:#d97706;
+  --radius:8px;
+  --shadow:0 1px 3px rgba(15,23,42,.08), 0 1px 2px rgba(15,23,42,.04);
+  --shadow-lg:0 10px 25px -5px rgba(15,23,42,.1), 0 8px 10px -6px rgba(15,23,42,.05);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  background:#f8fafc;
+  color:var(--ink);
+  font-size:14px;
+  line-height:1.5;
+  min-height:100vh;
+}
+
+/* TOP BAR */
+.topbar{
+  background:linear-gradient(135deg,#0f172a 0%,#1e3a8a 100%);
+  color:#fff;
+  padding:18px 32px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  box-shadow:var(--shadow-lg);
+}
+.brand{display:flex;align-items:center;gap:14px}
+.brand-mark{
+  width:42px;height:42px;border-radius:8px;
+  background:#fff;color:var(--accent);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:18px;letter-spacing:-.5px;
+}
+.brand-title{font-size:18px;font-weight:600;letter-spacing:-.2px}
+.brand-sub{font-size:12px;color:#cbd5e1;margin-top:2px}
+.topbar-nav{display:flex;gap:8px}
+.nav-btn{
+  background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.15);
+  padding:8px 14px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;
+  transition:all .15s;
+}
+.nav-btn:hover{background:rgba(255,255,255,.18)}
+
+/* LAYOUT */
+.container{max-width:1280px;margin:0 auto;padding:32px}
+.view{display:none}
+.view.active{display:block}
+
+/* DASHBOARD */
+.dashboard-header{margin-bottom:32px}
+.dashboard-title{font-size:28px;font-weight:700;letter-spacing:-.5px;color:var(--ink)}
+.dashboard-sub{color:var(--muted);font-size:15px;margin-top:6px}
+
+.card-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:20px;
+}
+.card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:28px;
+  cursor:pointer;
+  transition:all .2s;
+  position:relative;
+  overflow:hidden;
+}
+.card:hover{
+  transform:translateY(-2px);
+  box-shadow:var(--shadow-lg);
+  border-color:var(--accent-2);
+}
+.card-icon{
+  width:48px;height:48px;border-radius:10px;
+  background:var(--accent-soft);color:var(--accent);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;margin-bottom:18px;font-weight:700;
+}
+.card-title{font-size:17px;font-weight:600;margin-bottom:6px}
+.card-desc{color:var(--muted);font-size:13px;line-height:1.55}
+.card-stat{
+  position:absolute;top:20px;right:20px;
+  background:#f1f5f9;color:var(--muted);
+  padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;
+}
+
+/* PANELS */
+.panel{
+  background:#fff;border:1px solid var(--line);border-radius:10px;
+  padding:24px;margin-bottom:20px;box-shadow:var(--shadow);
+}
+.panel-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--line);
+}
+.panel-title{font-size:17px;font-weight:600}
+.panel-sub{color:var(--muted);font-size:13px;margin-top:2px}
+
+/* FORM */
+.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.form-grid-1{grid-template-columns:1fr}
+.form-grid-3{grid-template-columns:repeat(3,1fr)}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group.full{grid-column:1/-1}
+.form-label{font-size:12px;font-weight:600;color:var(--ink);text-transform:uppercase;letter-spacing:.3px}
+.form-label .req{color:var(--danger);margin-left:2px}
+.form-input,.form-select,.form-textarea{
+  border:1px solid var(--line);border-radius:6px;padding:10px 12px;font-size:14px;
+  font-family:inherit;color:var(--ink);background:#fff;transition:all .15s;
+}
+.form-input:focus,.form-select:focus,.form-textarea:focus{
+  outline:none;border-color:var(--accent-2);box-shadow:0 0 0 3px rgba(37,99,235,.1);
+}
+.form-textarea{resize:vertical;min-height:80px}
+
+/* BUTTONS */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  padding:9px 18px;border-radius:6px;font-size:13px;font-weight:600;
+  border:none;cursor:pointer;transition:all .15s;font-family:inherit;
+}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent-2)}
+.btn-secondary{background:#f1f5f9;color:var(--ink);border:1px solid var(--line)}
+.btn-secondary:hover{background:#e2e8f0}
+.btn-success{background:var(--success);color:#fff}
+.btn-success:hover{background:#047857}
+.btn-danger{background:#fef2f2;color:var(--danger);border:1px solid #fecaca}
+.btn-danger:hover{background:#fee2e2}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px}
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{
+  background:#f8fafc;color:var(--ink);font-weight:600;text-align:left;
+  padding:10px 14px;border-bottom:1px solid var(--line);font-size:12px;
+  text-transform:uppercase;letter-spacing:.3px;
+}
+.tbl td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:#f8fafc}
+.tbl input,.tbl select{
+  width:100%;border:1px solid var(--line);padding:7px 10px;border-radius:5px;font-size:13px;
+}
+.badge{
+  display:inline-block;padding:3px 9px;border-radius:12px;font-size:11px;font-weight:600;
+}
+.badge-partner{background:#eff6ff;color:#1e40af}
+.badge-owner{background:#f0fdf4;color:#166534}
+.badge-tenant{background:#fef3c7;color:#92400e}
+
+/* PREVIEW */
+.doc-preview{
+  background:#fff;border:1px solid var(--line);border-radius:8px;
+  padding:60px 50px;font-family:"Times New Roman",serif;font-size:13px;line-height:1.7;
+  max-height:600px;overflow-y:auto;color:#000;
+}
+.doc-preview h1{font-size:18px;text-align:center;margin-bottom:20px;font-weight:bold}
+.doc-preview h2{font-size:15px;margin:18px 0 10px;font-weight:bold}
+.doc-preview p{margin-bottom:10px}
+.doc-preview table{width:100%;border-collapse:collapse;margin:12px 0}
+.doc-preview table td,.doc-preview table th{border:1px solid #000;padding:6px 10px;font-size:12px}
+
+/* PERSON BLOCK */
+.person-block{
+  background:#f8fafc;border:1px solid var(--line);border-radius:8px;
+  padding:18px;margin-bottom:14px;position:relative;
+}
+.person-block-head{
+  display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;
+}
+.person-tag{
+  display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:13px;
+}
+.empty{text-align:center;padding:50px 20px;color:var(--muted)}
+.empty-icon{font-size:40px;margin-bottom:12px;opacity:.4}
+
+/* ALERT */
+.alert{padding:12px 16px;border-radius:6px;margin-bottom:16px;font-size:13px;display:flex;gap:10px}
+.alert-info{background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe}
+.alert-success{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}
+.alert-warn{background:#fffbeb;color:#92400e;border:1px solid #fde68a}
+
+/* TOAST */
+.toast{
+  position:fixed;bottom:24px;right:24px;background:#0f172a;color:#fff;
+  padding:14px 20px;border-radius:8px;box-shadow:var(--shadow-lg);
+  font-size:13px;font-weight:500;z-index:9999;opacity:0;transform:translateY(20px);
+  transition:all .25s;
+}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.success{background:#059669}
+.toast.error{background:#dc2626}
+
+/* MODAL */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(15,23,42,.6);display:none;
+  align-items:center;justify-content:center;z-index:1000;padding:20px;
+}
+.modal-overlay.show{display:flex}
+.modal{
+  background:#fff;border-radius:10px;max-width:540px;width:100%;
+  max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg);
+}
+.modal-head{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.modal-title{font-size:16px;font-weight:600}
+.modal-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted)}
+.modal-body{padding:22px}
+.modal-foot{padding:14px 22px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:10px}
+
+/* TABS */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:20px}
+.tab{
+  padding:10px 16px;cursor:pointer;font-size:13px;font-weight:500;color:var(--muted);
+  border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;
+}
+.tab:hover{color:var(--ink)}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+.split{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:900px){
+  .split,.form-grid,.form-grid-3{grid-template-columns:1fr}
+  .container{padding:16px}
+}
+
+/* Hidden util for print/export */
+.export-wrap{position:absolute;left:-9999px;top:0;width:794px}
+.section-divider{height:1px;background:var(--line);margin:24px 0}
+.muted-text{color:var(--muted);font-size:12px}
+.id-chip{
+  display:inline-block;background:var(--accent);color:#fff;padding:4px 12px;
+  border-radius:5px;font-weight:700;font-size:13px;letter-spacing:.5px;
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-mark">P</div>
+    <div>
+      <div class="brand-title">Pariman Advisors Pvt Ltd</div>
+      <div class="brand-sub">Document Automation Suite</div>
+    </div>
+  </div>
+  <div class="topbar-nav">
+    <button class="nav-btn" onclick="showView('dashboard')">Dashboard</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ====== DASHBOARD ====== -->
+  <div id="view-dashboard" class="view active">
+    <div class="dashboard-header">
+      <div class="dashboard-title">Welcome</div>
+      <div class="dashboard-sub">Manage master records and generate legal documents</div>
+    </div>
+    <div class="card-grid">
+      <div class="card" onclick="showView('master')">
+        <div class="card-stat" id="stat-masters">0 records</div>
+        <div class="card-icon">M</div>
+        <div class="card-title">Master Data</div>
+        <div class="card-desc">Create and manage unique IDs with multiple persons — partners, owners, tenants.</div>
+      </div>
+      <div class="card" onclick="showView('rent')">
+        <div class="card-icon">R</div>
+        <div class="card-title">Rent Agreement</div>
+        <div class="card-desc">Generate rent agreements with auto-filled owner and tenant details.</div>
+      </div>
+      <div class="card" onclick="showView('consent')">
+        <div class="card-icon">C</div>
+        <div class="card-title">Consent Letter</div>
+        <div class="card-desc">Generate GST consent letters from property owners to tenants.</div>
+      </div>
+      <div class="card" onclick="showView('partnership')">
+        <div class="card-icon">P</div>
+        <div class="card-title">Partnership Deed</div>
+        <div class="card-desc">Generate partnership deeds with capital and profit sharing tables.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== MASTER DATA ====== -->
+  <div id="view-master" class="view">
+    <div class="dashboard-header">
+      <div class="dashboard-title">Master Data</div>
+      <div class="dashboard-sub">Each unique ID groups multiple persons together</div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">All Records</div>
+          <div class="panel-sub">Click any record to view or edit</div>
+        </div>
+        <button class="btn btn-primary" onclick="newMaster()">+ Add Master</button>
+      </div>
+      <div id="master-list"></div>
+    </div>
+  </div>
+
+  <!-- ====== MASTER EDITOR ====== -->
+  <div id="view-master-edit" class="view">
+    <div class="dashboard-header">
+      <div style="display:flex;align-items:center;gap:14px">
+        <div class="dashboard-title">Master Record</div>
+        <span class="id-chip" id="me-uid"></span>
+      </div>
+      <div class="dashboard-sub">Add as many persons as needed under this unique ID</div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Persons in this record</div>
+          <div class="panel-sub">Select category and slot, then fill in details</div>
+        </div>
+        <button class="btn btn-primary" onclick="addPerson()">+ Add Person</button>
+      </div>
+      <div id="persons-container"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-success" onclick="saveMaster()">Save Record</button>
+      <button class="btn btn-secondary" onclick="showView('master')">Back to List</button>
+      <button class="btn btn-danger" onclick="deleteMaster()" id="delete-master-btn" style="margin-left:auto">Delete Record</button>
+    </div>
+  </div>
+
+  <!-- ====== RENT AGREEMENT ====== -->
+  <div id="view-rent" class="view">
+    <div class="dashboard-header">
+      <div class="dashboard-title">Rent Agreement</div>
+      <div class="dashboard-sub">Auto-fills owner and tenant from master data</div>
+    </div>
+
+    <div class="split">
+      <div>
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Document Details</div></div>
+          <div class="form-grid form-grid-1">
+            <div class="form-group">
+              <label class="form-label">Unique ID <span class="req">*</span></label>
+              <select class="form-select" id="rent-uid" onchange="rentLoadMaster()"></select>
+            </div>
+          </div>
+          <div class="section-divider"></div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Deed Execution Date</label>
+              <input type="text" class="form-input" id="rent-date" placeholder="e.g. 26th June 2026">
+            </div>
+            <div class="form-group">
+              <label class="form-label">City</label>
+              <input type="text" class="form-input" id="rent-city" placeholder="e.g. Mumbai">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Start Date</label>
+              <input type="text" class="form-input" id="rent-start" placeholder="e.g. 1st July 2026">
+            </div>
+            <div class="form-group">
+              <label class="form-label">End Date</label>
+              <input type="text" class="form-input" id="rent-end" placeholder="e.g. 30th June 2027">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Rent (Rs.)</label>
+              <input type="text" class="form-input" id="rent-amount" placeholder="e.g. 25,000">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Rs. in Words</label>
+              <input type="text" class="form-input" id="rent-words" placeholder="e.g. Twenty Five Thousand">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Security Deposit (Rs.)</label>
+              <input type="text" class="form-input" id="rent-deposit" placeholder="e.g. 50,000">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Maintenance Charges (Rs.)</label>
+              <input type="text" class="form-input" id="rent-maint" placeholder="e.g. 2,000">
+            </div>
+            <div class="form-group full">
+              <label class="form-label">Address of Property</label>
+              <textarea class="form-textarea" id="rent-property"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Owners & Tenants (from Master)</div></div>
+          <div id="rent-parties" class="muted-text">Select a Unique ID first</div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="renderRentPreview()">Update Preview</button>
+          <button class="btn btn-success" onclick="exportDoc('rent','pdf')">Download PDF</button>
+          <button class="btn btn-success" onclick="exportDoc('rent','word')">Download Word</button>
+          <button class="btn btn-secondary" onclick="showView('dashboard')">Back</button>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">Live Preview</div>
+              <div class="panel-sub">450px top spacing reserved for stamp paper</div>
+            </div>
+          </div>
+          <div class="doc-preview" id="rent-preview">
+            <div class="empty"><div class="empty-icon">📄</div>Fill in details to preview</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== CONSENT LETTER ====== -->
+  <div id="view-consent" class="view">
+    <div class="dashboard-header">
+      <div class="dashboard-title">Consent Letter</div>
+      <div class="dashboard-sub">GST registration NOC from owner to tenant</div>
+    </div>
+
+    <div class="split">
+      <div>
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Document Details</div></div>
+          <div class="form-grid form-grid-1">
+            <div class="form-group">
+              <label class="form-label">Unique ID <span class="req">*</span></label>
+              <select class="form-select" id="con-uid" onchange="conLoadMaster()"></select>
+            </div>
+          </div>
+          <div class="section-divider"></div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Owner Name</label>
+              <input type="text" class="form-input" id="con-owner">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Tenant Name</label>
+              <input type="text" class="form-input" id="con-tenant">
+            </div>
+            <div class="form-group full">
+              <label class="form-label">Principal Address (Property Address)</label>
+              <textarea class="form-textarea" id="con-address"></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Date</label>
+              <input type="text" class="form-input" id="con-date" placeholder="e.g. 26/06/2026">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Place</label>
+              <input type="text" class="form-input" id="con-place" placeholder="e.g. Mumbai">
+            </div>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="renderConsentPreview()">Update Preview</button>
+          <button class="btn btn-success" onclick="exportDoc('consent','pdf')">Download PDF</button>
+          <button class="btn btn-success" onclick="exportDoc('consent','word')">Download Word</button>
+          <button class="btn btn-secondary" onclick="showView('dashboard')">Back</button>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">Live Preview</div>
+              <div class="panel-sub">450px top spacing reserved for stamp paper</div>
+            </div>
+          </div>
+          <div class="doc-preview" id="consent-preview">
+            <div class="empty"><div class="empty-icon">📄</div>Fill in details to preview</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== PARTNERSHIP DEED ====== -->
+  <div id="view-partnership" class="view">
+    <div class="dashboard-header">
+      <div class="dashboard-title">Partnership Deed</div>
+      <div class="dashboard-sub">Auto-fills partners and includes capital/profit tables</div>
+    </div>
+
+    <div class="split">
+      <div>
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Document Details</div></div>
+          <div class="form-grid form-grid-1">
+            <div class="form-group">
+              <label class="form-label">Unique ID <span class="req">*</span></label>
+              <select class="form-select" id="pd-uid" onchange="pdLoadMaster()"></select>
+            </div>
+          </div>
+          <div class="section-divider"></div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Deed Execution Date</label>
+              <input type="text" class="form-input" id="pd-date" placeholder="e.g. 26th June 2026">
+            </div>
+            <div class="form-group">
+              <label class="form-label">City</label>
+              <input type="text" class="form-input" id="pd-city" placeholder="e.g. Mumbai">
+            </div>
+            <div class="form-group">
+              <label class="form-label">State</label>
+              <input type="text" class="form-input" id="pd-state" placeholder="e.g. Maharashtra">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Commencement Date</label>
+              <input type="text" class="form-input" id="pd-commence" placeholder="e.g. 1st July 2026">
+            </div>
+            <div class="form-group full">
+              <label class="form-label">Name of Firm</label>
+              <input type="text" class="form-input" id="pd-firm">
+            </div>
+            <div class="form-group full">
+              <label class="form-label">Place of Business</label>
+              <textarea class="form-textarea" id="pd-place"></textarea>
+            </div>
+            <div class="form-group full">
+              <label class="form-label">Object of Business</label>
+              <textarea class="form-textarea" id="pd-object"></textarea>
+            </div>
+            <div class="form-group full">
+              <label class="form-label">Bank Account Operations Authorised To</label>
+              <input type="text" class="form-input" id="pd-bank">
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Partners (from Master)</div></div>
+          <div id="pd-partners" class="muted-text">Select a Unique ID first</div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Capital Contribution</div></div>
+          <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Partner</th><th>Amount Contributed (Rs.)</th></tr></thead><tbody id="pd-cap-tbody"></tbody></table></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Profit Sharing Ratio</div></div>
+          <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Partner</th><th>Share %</th></tr></thead><tbody id="pd-profit-tbody"></tbody></table></div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="renderPartnershipPreview()">Update Preview</button>
+          <button class="btn btn-success" onclick="exportDoc('partnership','pdf')">Download PDF</button>
+          <button class="btn btn-success" onclick="exportDoc('partnership','word')">Download Word</button>
+          <button class="btn btn-secondary" onclick="showView('dashboard')">Back</button>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">Live Preview</div>
+              <div class="panel-sub">450px top spacing reserved for stamp paper</div>
+            </div>
+          </div>
+          <div class="doc-preview" id="pd-preview">
+            <div class="empty"><div class="empty-icon">📄</div>Fill in details to preview</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Hidden container for export rendering -->
+<div class="export-wrap" id="export-stage"></div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Confirm Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="modal-title">Confirm</div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-danger" id="modal-confirm">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===================================================================
+   PARIMAN ADVISORS - DOCUMENT AUTOMATION
+   Storage: IndexedDB
+   =================================================================== */
+
+/* ---------- Server-backed storage (Flask + SQLite) ---------- */
+function openDB(){ return Promise.resolve(); } // no-op, kept for compatibility with init call
+
+async function getAllMasters(){
+  const res = await fetch('/api/masters');
+  return await res.json();
+}
+async function getMaster(uid){
+  const res = await fetch('/api/masters/'+uid);
+  const data = await res.json();
+  return data || null;
+}
+async function putMaster(rec){
+  await fetch('/api/masters', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(rec)
+  });
+}
+async function delMaster(uid){
+  await fetch('/api/masters/'+uid, { method:'DELETE' });
+}
+async function nextUID(){
+  const res = await fetch('/api/next-uid', { method:'POST' });
+  if(!res.ok){ const e = await res.json(); throw new Error(e.error||'Failed to get next UID'); }
+  const data = await res.json();
+  return data.uid;
+}
+
+/* ---------- UI helpers ---------- */
+function showView(name){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  window.scrollTo(0,0);
+  if(name==='dashboard') refreshDashStats();
+  if(name==='master') renderMasterList();
+  if(name==='rent') populateUidDropdown('rent-uid');
+  if(name==='consent') populateUidDropdown('con-uid');
+  if(name==='partnership') populateUidDropdown('pd-uid');
+}
+function toast(msg,type='success'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast show '+type;
+  setTimeout(()=>t.className='toast',2500);
+}
+function modal(title,body,onConfirm,confirmText='Delete'){
+  document.getElementById('modal-title').textContent=title;
+  document.getElementById('modal-body').textContent=body;
+  const btn=document.getElementById('modal-confirm');
+  btn.textContent=confirmText;
+  btn.onclick=()=>{onConfirm();closeModal()};
+  document.getElementById('modal').classList.add('show');
+}
+function closeModal(){document.getElementById('modal').classList.remove('show')}
+
+/* ---------- Dashboard ---------- */
+async function refreshDashStats(){
+  const all=await getAllMasters();
+  document.getElementById('stat-masters').textContent=all.length+' record'+(all.length===1?'':'s');
+}
+
+/* ---------- Master List ---------- */
+async function renderMasterList(){
+  const all=await getAllMasters();
+  const wrap=document.getElementById('master-list');
+  if(!all.length){
+    wrap.innerHTML='<div class="empty"><div class="empty-icon">📂</div>No master records yet. Click "Add Master" to begin.</div>';
+    return;
+  }
+  let html='<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Unique ID</th><th>Persons</th><th>Categories</th><th></th></tr></thead><tbody>';
+  all.sort((a,b)=>a.uid-b.uid).forEach(m=>{
+    const cats={};
+    m.persons.forEach(p=>{cats[p.category]=(cats[p.category]||0)+1});
+    const catBadges=Object.entries(cats).map(([k,v])=>
+      `<span class="badge badge-${k.toLowerCase()}">${v} ${k}${v>1?'s':''}</span>`).join(' ');
+    html+=`<tr style="cursor:pointer" onclick="editMaster(${m.uid})">
+      <td><span class="id-chip">${m.uid}</span></td>
+      <td>${m.persons.length}</td>
+      <td>${catBadges||'<span class="muted-text">—</span>'}</td>
+      <td><button class="btn btn-sm btn-secondary" onclick="event.stopPropagation();editMaster(${m.uid})">Open</button></td>
+    </tr>`;
+  });
+  html+='</tbody></table></div>';
+  wrap.innerHTML=html;
+}
+
+/* ---------- Master Editor ---------- */
+let currentMaster=null;
+
+async function newMaster(){
+  const uid=await nextUID();
+  currentMaster={uid,persons:[]};
+  await putMaster(currentMaster);
+  openMasterEditor();
+}
+async function editMaster(uid){
+  currentMaster=await getMaster(uid);
+  if(!currentMaster) return toast('Record not found','error');
+  openMasterEditor();
+}
+function openMasterEditor(){
+  document.getElementById('me-uid').textContent='UID '+currentMaster.uid;
+  renderPersons();
+  showView('master-edit');
+}
+function categorySlots(cat){
+  if(cat==='Partner') return Array.from({length:20},(_,i)=>'Partner'+(i+1));
+  if(cat==='Owner') return Array.from({length:20},(_,i)=>'Owner'+(i+1));
+  if(cat==='Tenant') return Array.from({length:5},(_,i)=>'Tenant'+(i+1));
+  return [];
+}
+function renderPersons(){
+  const wrap=document.getElementById('persons-container');
+  if(!currentMaster.persons.length){
+    wrap.innerHTML='<div class="empty"><div class="empty-icon">👤</div>No persons added yet</div>';
+    return;
+  }
+  wrap.innerHTML='';
+  currentMaster.persons.forEach((p,idx)=>{
+    const div=document.createElement('div');
+    div.className='person-block';
+    div.innerHTML=`
+      <div class="person-block-head">
+        <div class="person-tag">
+          <span class="badge badge-${p.category.toLowerCase()}">${p.category}</span>
+          <span>${p.slot||'—'}</span>
+        </div>
+        <button class="btn btn-sm btn-danger" onclick="removePerson(${idx})">Remove</button>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select class="form-select" onchange="updatePerson(${idx},'category',this.value);renderPersons()">
+            <option ${p.category==='Partner'?'selected':''}>Partner</option>
+            <option ${p.category==='Owner'?'selected':''}>Owner</option>
+            <option ${p.category==='Tenant'?'selected':''}>Tenant</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Slot</label>
+          <select class="form-select" onchange="updatePerson(${idx},'slot',this.value)">
+            ${categorySlots(p.category).map(s=>`<option ${p.slot===s?'selected':''}>${s}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Name</label>
+          <input class="form-input" value="${escAttr(p.name||'')}" oninput="updatePerson(${idx},'name',this.value)">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Father / Husband Name</label>
+          <input class="form-input" value="${escAttr(p.father||'')}" oninput="updatePerson(${idx},'father',this.value)">
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Permanent Address</label>
+          <textarea class="form-textarea" oninput="updatePerson(${idx},'address',this.value)">${escHtml(p.address||'')}</textarea>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Principal Address (for GST Consent)</label>
+          <textarea class="form-textarea" oninput="updatePerson(${idx},'principal',this.value)">${escHtml(p.principal||'')}</textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mobile</label>
+          <input class="form-input" value="${escAttr(p.mobile||'')}" oninput="updatePerson(${idx},'mobile',this.value)">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input class="form-input" value="${escAttr(p.email||'')}" oninput="updatePerson(${idx},'email',this.value)">
+        </div>
+      </div>
+    `;
+    wrap.appendChild(div);
+  });
+}
+function addPerson(){
+  currentMaster.persons.push({category:'Partner',slot:'Partner1',name:'',father:'',address:'',principal:'',mobile:'',email:''});
+  renderPersons();
+}
+function updatePerson(idx,field,val){
+  currentMaster.persons[idx][field]=val;
+  if(field==='category'){
+    const slots=categorySlots(val);
+    currentMaster.persons[idx].slot=slots[0]||'';
+  }
+}
+function removePerson(idx){
+  currentMaster.persons.splice(idx,1);
+  renderPersons();
+}
+async function saveMaster(){
+  await putMaster(currentMaster);
+  toast('Record saved');
+}
+async function deleteMaster(){
+  modal('Delete this record?','This will permanently remove UID '+currentMaster.uid+' and all its persons.',async()=>{
+    await delMaster(currentMaster.uid);
+    toast('Record deleted');
+    showView('master');
+  });
+}
+
+function escHtml(s){return (s||'').toString().replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+function escAttr(s){return (s||'').toString().replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+
+/* ---------- UID Dropdown Population ---------- */
+async function populateUidDropdown(selectId){
+  const all=await getAllMasters();
+  const sel=document.getElementById(selectId);
+  const prev=sel.value;
+  sel.innerHTML='<option value="">— Select Unique ID —</option>'+
+    all.sort((a,b)=>a.uid-b.uid).map(m=>{
+      const cats=[...new Set(m.persons.map(p=>p.category))].join(', ');
+      return `<option value="${m.uid}">${m.uid} ${cats?'('+cats+')':''}</option>`;
+    }).join('');
+  if(prev) sel.value=prev;
+}
+
+/* ===================================================================
+   DOCUMENT TEMPLATES
+   Legal text preserved EXACTLY - no modifications
+   =================================================================== */
+
+/* ---------- RENT AGREEMENT ---------- */
+async function rentLoadMaster(){
+  const uid=parseInt(document.getElementById('rent-uid').value);
+  const wrap=document.getElementById('rent-parties');
+  if(!uid){wrap.innerHTML='<div class="muted-text">Select a Unique ID first</div>';return}
+  const m=await getMaster(uid);
+  const owners=m.persons.filter(p=>p.category==='Owner').sort(slotSort);
+  const tenants=m.persons.filter(p=>p.category==='Tenant').sort(slotSort);
+  let html='';
+  if(owners.length){
+    html+='<div style="font-weight:600;font-size:13px;margin-bottom:8px">Owners ('+owners.length+')</div>';
+    owners.forEach(o=>{html+=`<div class="person-block" style="padding:12px;margin-bottom:8px"><div><strong>${o.slot}</strong> — ${escHtml(o.name)||'(no name)'} S/o/W/o ${escHtml(o.father)||'—'}</div><div class="muted-text" style="margin-top:4px">${escHtml(o.address)||'(no address)'}</div></div>`});
+  }
+  if(tenants.length){
+    html+='<div style="font-weight:600;font-size:13px;margin:14px 0 8px">Tenants ('+tenants.length+')</div>';
+    tenants.forEach(t=>{html+=`<div class="person-block" style="padding:12px;margin-bottom:8px"><div><strong>${t.slot}</strong> — ${escHtml(t.name)||'(no name)'} S/o/W/o ${escHtml(t.father)||'—'}</div><div class="muted-text" style="margin-top:4px">${escHtml(t.address)||'(no address)'}</div></div>`});
+  }
+  if(!owners.length&&!tenants.length) html='<div class="alert alert-warn">No owners or tenants under this UID. Add them in Master Data.</div>';
+  wrap.innerHTML=html;
+  renderRentPreview();
+}
+function slotSort(a,b){
+  const na=parseInt((a.slot||'').replace(/\D/g,''))||0;
+  const nb=parseInt((b.slot||'').replace(/\D/g,''))||0;
+  return na-nb;
+}
+
+async function buildRentHtml(){
+  const uid=parseInt(document.getElementById('rent-uid').value);
+  if(!uid) return '<div class="empty"><div class="empty-icon">📄</div>Select a Unique ID</div>';
+  const m=await getMaster(uid);
+  const owners=m.persons.filter(p=>p.category==='Owner').sort(slotSort);
+  const tenants=m.persons.filter(p=>p.category==='Tenant').sort(slotSort);
+  const date=document.getElementById('rent-date').value||'____________';
+  const city=document.getElementById('rent-city').value||'[City]';
+  const start=document.getElementById('rent-start').value||'START DATE';
+  const end=document.getElementById('rent-end').value||'END DATE';
+  const rent=document.getElementById('rent-amount').value||'RENT';
+  const words=document.getElementById('rent-words').value||'Rs in Words';
+  const dep=document.getElementById('rent-deposit').value||'SECURITY DEPOSIT';
+  const maint=document.getElementById('rent-maint').value||'MAINTENANCE CHARGES';
+  const property=document.getElementById('rent-property').value||'ADDRESS OF PROPERTY';
+
+  const ownerBlocks=owners.length?owners.map(o=>`
+<p>Mr./Ms. ${escHtml(o.name)||o.slot}<br>
+Son/Daughter/Wife of ${escHtml(o.father)||'Father Name'},<br>
+Residing at ${escHtml(o.address)||'Permanent Address'},</p>`).join(''):
+`<p>Mr./Ms. Owner<br>Son/Daughter/Wife of Father Name,<br>Residing at Permanent Address ,</p>`;
+
+  const tenantBlocks=tenants.length?tenants.map(t=>`
+<p>Mr./Ms. ${escHtml(t.name)||t.slot},<br>
+Son/Daughter/Wife of ${escHtml(t.father)||'Father name'},<br>
+Residing at ${escHtml(t.address)||'Permanent Address'} ,</p>`).join(''):
+`<p>Mr./Ms. Tenant,<br>Son/Daughter/Wife of Father name,<br>Residing at Permanent Address ,</p>`;
+
+  const ownerSigs=owners.length?owners.map(o=>`
+<p><strong>OWNER — ${escHtml(o.name)||o.slot}</strong><br>
+Signature: ___________________________<br>
+Name: _______________________________</p>
+<hr style="border:0;border-top:1px solid #000;margin:10px 0">`).join(''):`
+<p><strong>OWNER</strong><br>
+Signature: ___________________________<br>
+Name: _______________________________</p>
+<hr style="border:0;border-top:1px solid #000;margin:10px 0">`;
+
+  const tenantSigs=tenants.length?tenants.map(t=>`
+<p><strong>TENANT — ${escHtml(t.name)||t.slot}</strong><br>
+Signature: ___________________________<br>
+Name: _______________________________</p>
+<hr style="border:0;border-top:1px solid #000;margin:10px 0">`).join(''):`
+<p><strong>TENANT</strong><br>
+Signature: ___________________________<br>
+Name: _______________________________</p>
+<hr style="border:0;border-top:1px solid #000;margin:10px 0">`;
+
+  return `
+<h1>RENT AGREEMENT</h1>
+<p>This RENT AGREEMENT is made and executed at ${escHtml(city)} on this ${escHtml(date)}</p>
+<p><strong>BY AND BETWEEN</strong></p>
+${ownerBlocks}
+<p>hereinafter referred to as the &ldquo;OWNER / LESSOR&rdquo; (which expression shall, unless repugnant to the context, include his/her heirs, legal representatives, successors, executors, administrators, and assigns) of the FIRST PART;</p>
+<p><strong>AND</strong></p>
+${tenantBlocks}
+<p>hereinafter referred to as the &ldquo;TENANT / LESSEE&rdquo; (which expression shall include legal representatives, successors, executors, administrators, and permitted assigns) of the SECOND PART.</p>
+<p>The Owner and Tenant are hereinafter collectively referred to as the &ldquo;Parties.&rdquo;</p>
+<p><strong>WHEREAS</strong></p>
+<p>A. The Owner is the lawful and absolute owner of the immovable property situated at:</p>
+<p>${escHtml(property).replace(/\n/g,'<br>')}</p>
+<p>(hereinafter referred to as the &ldquo;Demised Premises&rdquo;).</p>
+<p>B. The Tenant has approached the Owner requesting use of the said premises on rent for lawful residential purposes.</p>
+<p>C. The Owner has agreed to let out the premises on the terms and conditions stated herein below.</p>
+<p><strong>NOW THIS AGREEMENT WITNESSETH AS FOLLOWS:</strong></p>
+
+<p><strong>1. TERM OF TENANCY</strong><br>
+The tenancy shall commence from ${escHtml(start)} and shall remain valid up to ${escHtml(end)} unless terminated earlier in accordance with this Agreement.</p>
+
+<p><strong>2. MONTHLY RENT</strong><br>
+The Tenant shall pay monthly rent of Rs. ${escHtml(rent)}  (Rs in Words ${escHtml(words)} Rupees only).<br>
+Rent shall be paid on or before the 7th day of every calendar month without delay.</p>
+
+<p><strong>3. SECURITY DEPOSIT</strong><br>
+The Tenant shall pay an interest-free refundable security deposit of Rs. ${escHtml(dep)} to the Owner at the time of execution of this Agreement.<br>
+The security deposit shall be refunded at the time of vacating the premises after adjusting unpaid dues or damages, if any.</p>
+
+<p><strong>4. MAINTENANCE CHARGES</strong><br>
+The Tenant shall pay maintenance charges of Rs. ${escHtml(maint)} per month, if applicable.</p>
+
+<p><strong>5. ELECTRICITY AND WATER CHARGES</strong><br>
+All electricity, water, internet, gas, and utility charges consumed during the tenancy period shall be borne and paid by the Tenant.<br>
+All dues prior to commencement shall remain responsibility of the Owner.</p>
+
+<p><strong>6. USE OF PROPERTY</strong><br>
+The Tenant shall use the premises only for lawful purposes and shall not engage in illegal, immoral, hazardous, or prohibited activities.</p>
+
+<p><strong>7. NO SUBLETTING</strong><br>
+The Tenant shall not sublet, transfer, assign, share possession, or allow third-party occupation without prior written consent of the Owner.</p>
+
+<p><strong>8. REPAIRS AND MAINTENANCE</strong><br>
+Minor day-to-day repairs shall be borne by the Tenant.<br>
+Major structural repairs, unless caused by negligence of Tenant, shall remain responsibility of the Owner.</p>
+
+<p><strong>9. STRUCTURAL ALTERATION</strong><br>
+The Tenant shall not make structural modifications, construction changes, demolition, permanent fixtures, or alterations without prior written permission of the Owner.</p>
+
+<p><strong>10. INSPECTION RIGHTS</strong><br>
+The Owner shall have the right to inspect the premises after giving reasonable prior notice.</p>
+
+<p><strong>11. GOOD CONDITION OF PROPERTY</strong><br>
+The Tenant shall maintain the premises in good, hygienic, and habitable condition and shall return possession in substantially the same condition, subject to normal wear and tear.</p>
+
+<p><strong>12. TAXES AND GOVERNMENT CHARGES</strong><br>
+Municipal taxes, property tax, society charges, and statutory ownership charges shall be paid by the Owner.<br>
+Usage-based charges shall be paid by the Tenant.</p>
+
+<p><strong>13. QUIET POSSESSION</strong><br>
+The Owner guarantees peaceful possession of the premises during the tenancy period without unlawful interference.</p>
+
+<p><strong>14. DAMAGE LIABILITY</strong><br>
+Any damage caused to the property due to negligence, misuse, or wrongful conduct of the Tenant shall be compensated by the Tenant.</p>
+
+<p><strong>15. TERMINATION</strong><br>
+Either Party may terminate this Agreement by giving 30 days prior written notice.</p>
+
+<p><strong>16. VACATION OF PREMISES</strong><br>
+Upon expiry or termination, the Tenant shall peacefully hand over vacant possession of the premises.</p>
+
+<p><strong>17. INDEMNITY</strong><br>
+The Tenant agrees to indemnify and hold harmless the Owner against losses, damages, penalties, liabilities, or legal claims arising due to unlawful acts of Tenant.</p>
+
+<p><strong>19. FORCE MAJEURE</strong><br>
+Neither Party shall be held liable for events beyond reasonable control including natural calamity, earthquake, flood, fire, government restriction, or unavoidable circumstances.</p>
+
+<p><strong>20. REGISTRATION AND STAMP DUTY</strong><br>
+This Agreement shall be registered before the appropriate authority.<br>
+Stamp duty, registration charges, legal fees, and associated charges shall be borne equally by both Parties unless otherwise mutually agreed.</p>
+
+<p><strong>21. DISPUTE RESOLUTION</strong><br>
+Any dispute arising out of this Agreement shall first be resolved amicably.<br>
+Failing settlement, disputes shall fall under jurisdiction of courts situated at ${escHtml(city)} only.</p>
+
+<p><strong>22. ENTIRE AGREEMENT</strong><br>
+This document represents the complete understanding between both Parties.<br>
+No oral statements outside this Agreement shall have legal effect.</p>
+
+<p><strong>23. BINDING EFFECT</strong><br>
+The terms of this Agreement shall remain binding upon heirs, successors, representatives, and permitted assigns of both Parties.</p>
+<hr style="border:0;border-top:1px solid #000;margin:14px 0">
+
+<p><strong>SIGNATURES</strong></p>
+${ownerSigs}
+${tenantSigs}
+<p>Date: ____ / ____ / ______<br>Place: _______________________________</p>
+
+<p><strong>WITNESSES</strong></p>
+<p><strong>Witness 1</strong><br>
+Name: ______________________________________<br>
+Address: ____________________________________<br>
+Signature: _________________________________</p>
+<hr style="border:0;border-top:1px solid #000;margin:10px 0">
+<p><strong>Witness 2</strong><br>
+Name: ______________________________________<br>
+Address: ____________________________________<br>
+Signature: _________________________________</p>`;
+}
+
+async function renderRentPreview(){
+  const html=await buildRentHtml();
+  document.getElementById('rent-preview').innerHTML=html;
+}
+
+/* ---------- CONSENT LETTER ---------- */
+async function conLoadMaster(){
+  const uid=parseInt(document.getElementById('con-uid').value);
+  if(!uid) return;
+  const m=await getMaster(uid);
+  const owner=m.persons.filter(p=>p.category==='Owner').sort(slotSort)[0];
+  const tenant=m.persons.filter(p=>p.category==='Tenant').sort(slotSort)[0];
+  if(owner){
+    document.getElementById('con-owner').value=owner.name||'';
+    document.getElementById('con-address').value=owner.principal||owner.address||'';
+  }
+  if(tenant){
+    document.getElementById('con-tenant').value=tenant.name||'';
+  }
+  renderConsentPreview();
+}
+
+function buildConsentHtml(){
+  const owner=document.getElementById('con-owner').value||'(owner)';
+  const tenant=document.getElementById('con-tenant').value||'(Tenant)';
+  const address=document.getElementById('con-address').value||'Principal address';
+  const date=document.getElementById('con-date').value||'…….……….';
+  const place=document.getElementById('con-place').value||'…………….';
+
+  return `
+<h1>CONSENT LETTER</h1>
+<p><strong>TO WHOMSOEVER IT MAY CONCERN</strong></p>
+<p>This is to certify that I ${escHtml(owner)}, owner of the property (${escHtml(address).replace(/\n/g,'<br>')}) have permitted and allowed ${escHtml(tenant)} for operating and conducting their business from the ADDRESS MENTIONED ABOVE. I further state that I have no objection if ${escHtml(tenant)} uses the address of the said premises as their mailing address. This is no objection certificate issued to obtain registration under GST.</p>
+<p>Owner of the property</p>
+<p>Sd/- Signature (${escHtml(owner)})</p>
+<p>Date: ${escHtml(date)}</p>
+<p>Place: ${escHtml(place)}</p>`;
+}
+function renderConsentPreview(){
+  document.getElementById('consent-preview').innerHTML=buildConsentHtml();
+}
+
+/* ---------- PARTNERSHIP DEED ---------- */
+let pdPartners=[];
+
+async function pdLoadMaster(){
+  const uid=parseInt(document.getElementById('pd-uid').value);
+  const wrap=document.getElementById('pd-partners');
+  if(!uid){wrap.innerHTML='<div class="muted-text">Select a Unique ID first</div>';return}
+  const m=await getMaster(uid);
+  pdPartners=m.persons.filter(p=>p.category==='Partner').sort(slotSort);
+  if(!pdPartners.length){
+    wrap.innerHTML='<div class="alert alert-warn">No partners under this UID. Add them in Master Data.</div>';
+    renderPdTables();
+    return;
+  }
+  wrap.innerHTML=pdPartners.map(p=>`<div class="person-block" style="padding:12px;margin-bottom:8px"><div><strong>${p.slot}</strong> — ${escHtml(p.name)||'(no name)'} S/o/W/o ${escHtml(p.father)||'—'}</div><div class="muted-text" style="margin-top:4px">${escHtml(p.address)||'(no address)'}</div></div>`).join('');
+  renderPdTables();
+  renderPartnershipPreview();
+}
+
+function renderPdTables(){
+  const cap=document.getElementById('pd-cap-tbody');
+  const prof=document.getElementById('pd-profit-tbody');
+  if(!pdPartners.length){
+    cap.innerHTML='<tr><td colspan="2" class="muted-text" style="text-align:center;padding:20px">Select a UID with partners</td></tr>';
+    prof.innerHTML='<tr><td colspan="2" class="muted-text" style="text-align:center;padding:20px">Select a UID with partners</td></tr>';
+    return;
+  }
+  cap.innerHTML=pdPartners.map((p,i)=>`<tr><td>${escHtml(p.name)||p.slot}</td><td><input id="pd-cap-${i}" placeholder="Rs." oninput="renderPartnershipPreview()"></td></tr>`).join('');
+  prof.innerHTML=pdPartners.map((p,i)=>`<tr><td>${escHtml(p.name)||p.slot}</td><td><input id="pd-prof-${i}" placeholder="%" oninput="renderPartnershipPreview()"></td></tr>`).join('');
+}
+
+function buildPartnershipHtml(){
+  if(!pdPartners.length) return '<div class="empty"><div class="empty-icon">📄</div>Select a Unique ID with partners</div>';
+  const date=document.getElementById('pd-date').value||'Deed Execution date';
+  const city=document.getElementById('pd-city').value||'[City';
+  const state=document.getElementById('pd-state').value||'State]';
+  const firm=document.getElementById('pd-firm').value||'NAME OF THE FIRM';
+  const place=document.getElementById('pd-place').value||'PLACE OF BUSINESS';
+  const object=document.getElementById('pd-object').value||'OBJECT OF BUSINESS';
+  const commence=document.getElementById('pd-commence').value||'COMMENCEMENT DATE';
+  const bank=document.getElementById('pd-bank').value||'BANK ACCOUNT OPERATIONS AUTHORISED TO';
+
+  const ordinal=['First','Second','Third','Fourth','Fifth','Sixth','Seventh','Eighth','Ninth','Tenth','Eleventh','Twelfth','Thirteenth','Fourteenth','Fifteenth','Sixteenth','Seventeenth','Eighteenth','Nineteenth','Twentieth'];
+  const partyBlocks=pdPartners.map((p,i)=>`
+<p>${i+1}. Mr./Ms. ${escHtml(p.name)||p.slot}<br>
+Son/Daughter/Wife of ${escHtml(p.father)||'Father Name'}<br>
+Residing at: ${escHtml(p.address)||'Permanent Address'}<br>
+(Hereinafter referred to as the ${ordinal[i]||(i+1+'th')} Partner)</p>`).join('');
+
+  const capRows=pdPartners.map((p,i)=>{
+    const v=(document.getElementById('pd-cap-'+i)||{}).value||'';
+    return `<tr><td>${escHtml(p.name)||p.slot}</td><td>Rs. ${escHtml(v)}</td></tr>`;
+  }).join('');
+
+  const profRows=pdPartners.map((p,i)=>{
+    const v=(document.getElementById('pd-prof-'+i)||{}).value||'';
+    return `<tr><td>${escHtml(p.name)||p.slot}</td><td>${escHtml(v)}${v?'%':''}</td></tr>`;
+  }).join('');
+
+  const sigs=pdPartners.map(p=>`
+<p><strong>${p.slot} — ${escHtml(p.name)||''}</strong><br>
+Signature: __________________________<br>
+Name: ______________________________</p>
+<hr style="border:0;border-top:1px solid #000;margin:10px 0">`).join('');
+
+  return `
+<h1>PARTNERSHIP DEED</h1>
+<p>This Deed of Partnership is executed on this ${escHtml(date)}, at ${escHtml(city)}, ${escHtml(state)}, by and between the following parties:</p>
+${partyBlocks}
+<p>(All the above persons are collectively referred to as &ldquo;Partners&rdquo;)</p>
+<p>WHEREAS all Partners have mutually agreed to carry on business in partnership under the terms and conditions contained herein.</p>
+<hr style="border:0;border-top:1px solid #000;margin:14px 0">
+
+<p><strong>1. NAME OF THE FIRM</strong><br>
+The name of the partnership firm shall be:<br>
+M/s ${escHtml(firm)}<br>
+or such other name as may be mutually agreed by the Partners.</p>
+
+<p><strong>2. PLACE OF BUSINESS</strong><br>
+The principal place of business shall be situated at:<br>
+${escHtml(place).replace(/\n/g,'<br>')}<br>
+The firm may establish branch offices or additional places of business anywhere in India with consent of all Partners.</p>
+
+<p><strong>3. OBJECT OF BUSINESS</strong><br>
+The firm shall carry on the business of:<br>
+${escHtml(object).replace(/\n/g,'<br>')} and any other lawful business activity as may be decided jointly by the Partners.</p>
+
+<p><strong>4. COMMENCEMENT</strong><br>
+The partnership business shall commence from: ${escHtml(commence)} and shall continue unless dissolved as per terms of this Deed.</p>
+
+<p><strong>5. CAPITAL CONTRIBUTION</strong><br>
+The Partners shall contribute capital in the following proportion:</p>
+<table><thead><tr><th>Partner</th><th>Amount Contributed</th></tr></thead><tbody>${capRows}</tbody></table>
+<p>Any further capital introduced shall be with mutual consent.</p>
+
+<p><strong>6. PROFIT AND LOSS SHARING</strong><br>
+Net profits and losses shall be shared in the following ratio:</p>
+<table><thead><tr><th>Partner</th><th>Share %</th></tr></thead><tbody>${profRows}</tbody></table>
+<p>The ratio may be modified only through written consent of all Partners.</p>
+
+<p><strong>7. MANAGEMENT AND AUTHORITY</strong><br>
+The business shall be managed collectively by the Partners.<br>
+No Partner shall make any major financial or contractual commitment without consent of the other Partners.</p>
+
+<p><strong>8. BANK ACCOUNT OPERATIONS</strong><br>
+The firm shall maintain one or more bank accounts in the name of the firm.<br>
+The account shall be operated by: ${escHtml(bank)}<br>
+or by such persons authorized by mutual consent.</p>
+
+<p><strong>9. DUTIES AND OBLIGATIONS</strong><br>
+Each Partner shall:<br>
+&bull; Act honestly and diligently<br>
+&bull; Promote interests of the firm<br>
+&bull; Maintain confidentiality<br>
+&bull; Avoid actions causing financial loss<br>
+&bull; Maintain good faith towards other Partners</p>
+
+<p><strong>10. BOOKS OF ACCOUNTS</strong><br>
+Proper books of accounts shall be maintained at the principal place of business.<br>
+All Partners shall have unrestricted access to inspect financial records.<br>
+Financial year shall close on 31 March every year.</p>
+
+<p><strong>11. REMUNERATION TO WORKING PARTNERS</strong><br>
+Working Partners may receive remuneration, salary, commission, or bonus as mutually agreed.<br>
+Such remuneration shall remain subject to provisions of the Income Tax Act, 1961.</p>
+
+<p><strong>12. INTEREST ON CAPITAL AND LOANS</strong><br>
+Interest on capital contribution or partner loans, if payable, shall be mutually agreed in writing.</p>
+
+<p><strong>13. DRAWINGS</strong><br>
+Partners may withdraw funds for personal use subject to mutual agreement.<br>
+All drawings shall be recorded in books of account.</p>
+
+<p><strong>14. ADMISSION OF NEW PARTNER</strong><br>
+No new Partner shall be admitted without unanimous written consent of all existing Partners.<br>
+A supplementary partnership deed shall be executed.</p>
+
+<p><strong>15. RETIREMENT OF PARTNER</strong><br>
+Any Partner may retire by giving 30 days written notice.<br>
+Settlement of accounts shall be made on the date of retirement.</p>
+
+<p><strong>16. DEATH OR INCAPACITY</strong><br>
+Upon death or incapacity of any Partner, remaining Partners may continue business.<br>
+Settlement with legal heirs shall be made based on capital balance and share of profits.</p>
+
+<p><strong>17. RESTRICTION ON COMPETING BUSINESS</strong><br>
+No Partner shall directly or indirectly engage in competing business without written approval of other Partners.</p>
+
+<p><strong>18. BORROWINGS</strong><br>
+Loans, borrowings, guarantees, or financial liabilities may be undertaken only with approval of all Partners.</p>
+
+<p><strong>19. INDEMNITY</strong><br>
+Any Partner causing financial loss due to fraud, negligence, misconduct, or unauthorized action shall indemnify the firm and remaining Partners.</p>
+
+<p><strong>20. AUDIT AND TAX COMPLIANCE</strong><br>
+The firm shall maintain proper statutory compliance including:<br>
+&bull; Income Tax<br>
+&bull; GST compliance<br>
+&bull; Accounting records<br>
+&bull; Audit requirements as applicable under law</p>
+
+<p><strong>21. DISSOLUTION</strong><br>
+The firm may be dissolved by:<br>
+&bull; Mutual consent<br>
+&bull; Insolvency<br>
+&bull; Death (if partners decide not to continue)<br>
+&bull; Court order<br>
+&bull; Any lawful reason under applicable law<br>
+Upon dissolution, assets and liabilities shall be settled proportionately.</p>
+
+<p><strong>22. ARBITRATION AND DISPUTE RESOLUTION</strong><br>
+Any dispute arising among Partners shall first be resolved amicably.<br>
+If unresolved, disputes shall be referred to arbitration under applicable Indian law.<br>
+Courts at ${escHtml(city)} shall have exclusive jurisdiction.</p>
+
+<p><strong>23. GOVERNING LAW</strong><br>
+This Partnership Deed shall be governed by:<br>
+The Indian Partnership Act, 1932<br>
+Income Tax Act, 1961<br>
+and other applicable laws in force in India.</p>
+
+<p><strong>24. BINDING EFFECT</strong><br>
+This Deed shall remain binding upon all Partners, their legal representatives, heirs, successors, and permitted assigns.</p>
+<hr style="border:0;border-top:1px solid #000;margin:14px 0">
+
+<p><strong>SIGNATURES</strong></p>
+${sigs}
+
+<p><strong>WITNESSES</strong></p>
+<p><strong>Witness 1</strong><br>
+Name: __________________________<br>
+Address: ________________________<br>
+Signature: ______________________</p>
+<hr style="border:0;border-top:1px solid #000;margin:10px 0">
+<p><strong>Witness 2</strong><br>
+Name: __________________________<br>
+Address: ________________________<br>
+Signature: ______________________</p>
+<p>Date: ____ / ____ / ______<br>
+Place: __________________________</p>`;
+}
+
+function renderPartnershipPreview(){
+  document.getElementById('pd-preview').innerHTML=buildPartnershipHtml();
+}
+
+/* ===================================================================
+   EXPORT - PDF and Word
+   Top spacing 450px preserved for stamp paper
+   =================================================================== */
+
+const EXPORT_CSS=`
+  body{font-family:'Times New Roman',serif;font-size:13px;line-height:1.7;color:#000;margin:0;padding:0}
+  .stamp-space{height:450px}
+  .doc-body{padding:0 50px 50px 50px}
+  h1{font-size:18px;text-align:center;margin:0 0 20px;font-weight:bold}
+  p{margin:0 0 10px}
+  table{width:100%;border-collapse:collapse;margin:12px 0}
+  table td,table th{border:1px solid #000;padding:6px 10px;font-size:12px}
+  hr{border:0;border-top:1px solid #000}
+`;
+
+async function buildExportHtml(type){
+  let inner='';
+  if(type==='rent') inner=await buildRentHtml();
+  else if(type==='consent') inner=buildConsentHtml();
+  else if(type==='partnership') inner=buildPartnershipHtml();
+  return `<style>${EXPORT_CSS}</style><div class="stamp-space"></div><div class="doc-body">${inner}</div>`;
+}
+
+async function exportDoc(type,format){
+  const html=await buildExportHtml(type);
+  if(format==='pdf') return exportPDF(html,type);
+  return exportWord(html,type);
+}
+
+async function exportPDF(html,type){
+  const stage=document.getElementById('export-stage');
+  stage.innerHTML=html;
+  toast('Generating PDF…','');
+  try{
+    await html2pdf().set({
+      margin:[0,0,0,0],
+      filename:`${type}_${Date.now()}.pdf`,
+      image:{type:'jpeg',quality:.98},
+      html2canvas:{scale:2,useCORS:true},
+      jsPDF:{unit:'px',format:[794,1123],orientation:'portrait',hotfixes:['px_scaling']},
+      pagebreak:{mode:['avoid-all','css','legacy']}
+    }).from(stage).save();
+    toast('PDF downloaded');
+  }catch(e){
+    console.error(e);
+    toast('PDF generation failed','error');
+  }
+  stage.innerHTML='';
+}
+
+function exportWord(html,type){
+  // Word-compatible HTML with proper top spacing
+  // 450px ≈ 337.5pt for stamp paper
+  const wordCss=`
+    @page{size:8.5in 11in;margin:0in}
+    body{font-family:'Times New Roman',serif;font-size:13pt;line-height:1.7;color:#000;margin:0}
+    .stamp-space{height:337pt;width:100%}
+    .doc-body{padding:0 50pt 50pt 50pt}
+    h1{font-size:18pt;text-align:center;margin:0 0 14pt;font-weight:bold}
+    p{margin:0 0 8pt}
+    table{width:100%;border-collapse:collapse;margin:10pt 0}
+    table td,table th{border:1px solid #000;padding:5pt 8pt;font-size:11pt}
+    hr{border:0;border-top:1px solid #000}
+  `;
+  let inner='';
+  if(type==='rent') inner=document.getElementById('rent-preview').innerHTML;
+  else if(type==='consent') inner=document.getElementById('consent-preview').innerHTML;
+  else if(type==='partnership') inner=document.getElementById('pd-preview').innerHTML;
+
+  const wordDoc=`
+<!DOCTYPE html>
+<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta charset="utf-8">
+<title>Document</title>
+<!--[if gte mso 9]>
+<xml>
+<w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument>
+</xml>
+<![endif]-->
+<style>${wordCss}</style>
+</head>
+<body>
+<div class="stamp-space">&nbsp;</div>
+<div class="doc-body">${inner}</div>
+</body>
+</html>`;
+  const blob=new Blob(['\ufeff',wordDoc],{type:'application/msword'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=`${type}_${Date.now()}.doc`;
+  document.body.appendChild(a);a.click();
+  setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url)},100);
+  toast('Word document downloaded');
+}
+
+/* ---------- Init ---------- */
+(async function init(){
+  await openDB();
+  await refreshDashStats();
+})();
+</script>
+</body>
+</html>
