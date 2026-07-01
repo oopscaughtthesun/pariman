@@ -48,6 +48,10 @@ init_db()
 def index():
     return render_template("itr.html")
 
+@app.route("/ping")
+def ping():
+    return "ok", 200
+
 
 # ---------- KV store (clients, users, allocations, inward, itrStatus, seq) ----------
 
